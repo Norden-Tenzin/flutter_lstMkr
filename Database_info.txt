@@ -1,0 +1,26 @@
+table weekday_list
+CREATE TABLE WeekdayTasksTemplate(template_id TEXT PRIMARY KEY, lid INTEGER, day TEXT, des TEXT);
+
+table weekday_data
+CREATE TABLE WeekdayTasks(task_id TEXT PRIMARY KEY, lid INTEGER, day TEXT, date TEXT, des TEXT, checked INTEGER); 
+
+additem - DONE 
+	-	adds the item to the WeekdayTasksTemplate for that weekday. 
+	-	adds the item to the WeekdayTasks for that weekday. 
+
+updateitem - DONE
+	-	Text:
+		-	change item in  WeekdayTasks for that date. 
+		-	change item in  WeekdayTasksTemplate for that weekday. 
+	-	checked:
+		-	change item in  WeekdayTasks for that date. 
+
+removeItem -  DONE 
+	-	remove item from WeekdayTasksTemplate for that weekday. 
+	-	remove item from WeekdayTasks for that weekday and date. 
+
+retrieveList -
+	-	if that date exists in WeekdayTasks
+		-	then get list from WeekdayTasks for that date
+	-	else:
+		-	then get list from WeekdayTasksTemplate for that day

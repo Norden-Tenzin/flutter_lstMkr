@@ -40,6 +40,7 @@ dependencies:
   msh_checkbox: ^1.1.1
   sqflite: ^2.1.0+1
   intl: ^0.17.0
+  uuid: ^3.0.6
 
 dev_dependencies:
   flutter_test:

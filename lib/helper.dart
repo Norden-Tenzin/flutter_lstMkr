@@ -1,24 +1,40 @@
 // import 'dart:developer';
 // var newMap = {'checked': false, 'itemValue': ""};
+import 'package:sqflite/sqflite.dart';
+import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
+import 'database.dart';
+
+var uuid = const Uuid();
 
 class ItemHolder {
   late int curr;
-  late List lst;
+  late List<ItemObj> lst;
 
   ItemHolder() {
     curr = 0;
     lst = [];
   }
 
-  addItems(day, itemValue, checked) {
-    lst.add(ItemObj.arg(curr, day, itemValue, checked));
+  addItems(DatabaseHelper dbHelper, ItemObj item) {
+    item.setLID(curr);
+    lst.add(item);
+    try {
+      dbHelper.insertItem(item);
+    } on DatabaseException {
+      print("COULDNT ADD");
+    } catch (e) {
+      print(e);
+    }
     curr++;
   }
 }
 
 class ItemObj {
-  late int id;
+  late String taskId;
+  late int lid;
   late String day;
+  late String date;
   late String itemValue;
 
   // 0 == False and 1 == True
@@ -29,7 +45,24 @@ class ItemObj {
     checked = 0;
   }
 
-  ItemObj.arg(this.id, this.day, this.itemValue, this.checked);
+  ItemObj.weekday(String weekday, String weekdate) {
+    taskId = uuid.v4();
+    itemValue = "";
+    day = weekday;
+    date = weekdate;
+    checked = 0;
+  }
+
+  ItemObj.arg(this.taskId, this.lid, this.day, this.itemValue, this.checked);
+
+  ItemObj.maps(maps) {
+    taskId = maps['taskId'];
+    lid = maps['lid'];
+    day = maps['day'];
+    date = maps['date'];
+    itemValue = maps['des'];
+    checked = maps['checked'];
+  }
 
   flipSwitch() {
     if (checked == 1) {
@@ -37,6 +70,10 @@ class ItemObj {
     } else if (checked == 0) {
       checked = 1;
     }
+  }
+
+  setLID(int curr) {
+    lid = curr;
   }
 
   setTrue() {
@@ -56,6 +93,75 @@ class ItemObj {
   }
 
   Map<String, dynamic> toMap() {
-    return {"id": id, "description": itemValue, "check": checked};
+    return {
+      "taskId": taskId,
+      "lid": lid,
+      "description": itemValue,
+      "check": checked
+    };
   }
+
+  @override
+  String toString() {
+    return "taskId $taskId, lid: $lid, description: $itemValue, day: $day, date: $date, check: $checked";
+  }
+}
+
+var week = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday"
+];
+
+List<dynamic> createWeek() {
+  var weekindex = [-3, -2, -1, 0, 1, 2, 3];
+  var currDayTime = DateTime.now();
+  var currDay = DateFormat('EEEE').format(currDayTime);
+  var currDate = DateFormat('yMd').format(currDayTime);
+  var index = week.indexWhere((day) => day == currDay);
+  var res = [];
+
+  try {
+    for (int i = 0; i < 7; i++) {
+      var currindex = index + weekindex[i];
+      if (currindex < 0) {
+        res.add([
+          week[week.length + currindex],
+          DateFormat('yMd')
+              .format(currDayTime.subtract(Duration(days: weekindex[i].abs())))
+        ]);
+      } else if (currindex == index) {
+        res.add([week[index], currDate]);
+      } else if (currindex >= 7) {
+        res.add([
+          week[currindex - weekindex.length],
+          DateFormat('yMd')
+              .format(currDayTime.add(Duration(days: weekindex[i])))
+        ]);
+      } else {
+        res.add([
+          week[currindex],
+          DateFormat('yMd')
+              .format(currDayTime.add(Duration(days: weekindex[i])))
+        ]);
+      }
+    }
+  } catch (e) {
+    print("ERROR: $e");
+  }
+  return res;
+}
+
+int getDayInt(currday) {
+  List<dynamic> week = createWeek();
+  for (int i = 0; i < week.length; i++) {
+    if (currday == week[i][0]) {
+      return i;
+    }
+  }
+  return 0;
 }

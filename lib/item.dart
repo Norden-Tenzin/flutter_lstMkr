@@ -5,16 +5,19 @@ import 'package:msh_checkbox/msh_checkbox.dart';
 
 // my imps
 import 'helper.dart';
+import 'database.dart';
 
 class Item extends StatefulWidget {
   // final ItemController controller;
   final Function removeFunc;
   final ItemObj itemObj;
+  final DatabaseHelper db;
   const Item(
       {Key? key,
       // required this.controller,
       required this.itemObj,
-      required this.removeFunc})
+      required this.removeFunc,
+      required this.db})
       : super(key: key);
 
   @override
@@ -36,6 +39,7 @@ class _ItemState extends State<Item> {
     editingController.addListener(() {
       String text = editingController.text;
       widget.itemObj.setItemValue(text);
+      widget.db.updateItem(widget.itemObj);
     });
   }
 
@@ -43,7 +47,6 @@ class _ItemState extends State<Item> {
   void didUpdateWidget(covariant Item oldwidget) {
     super.didUpdateWidget(oldwidget);
     editingController.text = widget.itemObj.itemValue;
-    print('Widget Lifecycle: didUpdateWidget');
   }
 
   // void refresh() {
@@ -77,11 +80,13 @@ class _ItemState extends State<Item> {
                     value: isChecked,
                     checkedColor: Colors.blue,
                     style: MSHCheckboxStyle.fillScaleColor,
-                    onChanged: (selected) {
+                    onChanged: (selected) async {
                       setState(() {
                         log("$selected");
                         isChecked = selected;
-                        widget.itemObj.setBool(selected == true ? 1 : 0);
+                        int val = selected == true ? 1 : 0;
+                        widget.itemObj.setBool(val);
+                        widget.db.updateItem(widget.itemObj);
                       });
                     })),
             Expanded(
@@ -97,17 +102,9 @@ class _ItemState extends State<Item> {
                   child: IconButton(
                       icon: const Icon(Icons.clear),
                       onPressed: () {
-                        var val = widget.itemObj.itemValue;
-
                         editingController.clear();
                         widget.itemObj.setItemValue("");
-                        widget.removeFunc(widget.itemObj.id);
-                        // post.lst = _removeLst(post.lst, entry.key);
-                        // curr = post.lst.length;
-                        // print(post.lst.length % entry.key);
-                        // print(entry.key % post.lst.length);
-                        // print(post.lst);
-                        // print(post.lst.indexOf(entry));
+                        widget.removeFunc(widget.itemObj);
                       })),
             ),
           ],
