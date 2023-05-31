@@ -45,6 +45,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
 
   List<Widget> createDayWidgets() {
     List<dynamic> week = createWeek();
+    print("WEEK: $week");
     List<Widget> res = [];
     for (dynamic i in week) {
       res.add(DayWidget(weekday: i[0], date: i[1], page: page));
@@ -129,7 +130,6 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
                         //                     fontWeight: FontWeight.bold),
                         //               ))
                         //         })),
-
                         // the list part
                         Expanded(
                           child: PageView(
@@ -137,25 +137,6 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
                             children: createDayWidgets(),
                           ),
                         )
-
-                        // PageView.builder(
-                        //   controller: pageController,
-                        //   itemBuilder: (BuildContext context, int itemIndex) {
-                        //     return createDay();
-                        //   },
-                        // )
-
-                        // Expanded(
-                        //     child:
-                        //         PageView(controller: pageController, children: [
-                        //   DayWidget(weekday: "Monday", page: page),
-                        //   DayWidget(weekday: "Tuesday", page: page),
-                        //   DayWidget(weekday: "Wednesday", page: page),
-                        //   DayWidget(weekday: "Thursday", page: page),
-                        //   DayWidget(weekday: "Friday", page: page),
-                        //   DayWidget(weekday: "Saturday", page: page),
-                        //   DayWidget(weekday: "Sunday", page: page)
-                        // ]))
                       ],
                     )))));
   }

@@ -121,7 +121,9 @@ List<dynamic> createWeek() {
   var weekindex = [-3, -2, -1, 0, 1, 2, 3];
   var currDayTime = DateTime.now();
   var currDay = DateFormat('EEEE').format(currDayTime);
-  var currDate = DateFormat('yMd').format(currDayTime);
+  var currDate = DateFormat('MM.dd.yyyy').format(currDayTime);
+
+  print("DATE: ${DateFormat('MM.dd.yyyy').format(currDayTime)}");
   var index = week.indexWhere((day) => day == currDay);
   var res = [];
 
@@ -131,7 +133,7 @@ List<dynamic> createWeek() {
       if (currindex < 0) {
         res.add([
           week[week.length + currindex],
-          DateFormat('yMd')
+          DateFormat('MM.dd.yyyy')
               .format(currDayTime.subtract(Duration(days: weekindex[i].abs())))
         ]);
       } else if (currindex == index) {
@@ -139,13 +141,13 @@ List<dynamic> createWeek() {
       } else if (currindex >= 7) {
         res.add([
           week[currindex - weekindex.length],
-          DateFormat('yMd')
+          DateFormat('MM.dd.yyyy')
               .format(currDayTime.add(Duration(days: weekindex[i])))
         ]);
       } else {
         res.add([
           week[currindex],
-          DateFormat('yMd')
+          DateFormat('MM.dd.yyyy')
               .format(currDayTime.add(Duration(days: weekindex[i])))
         ]);
       }

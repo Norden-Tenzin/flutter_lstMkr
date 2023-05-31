@@ -66,19 +66,24 @@ class _ItemState extends State<Item> {
   Widget build(BuildContext context) {
     int initIsChecked = widget.itemObj.checked;
     bool isChecked = initIsChecked == 1 ? true : false;
-
-    return Container(
-        height: 50,
-        padding: const EdgeInsets.only(left: 15, right: 10),
-        child: Row(
+    return
+        // Container(
+        //     height: 50,
+        //     padding: const EdgeInsets.only(left: 15, right: 10),
+        //     child:
+        Column(
+      children: [
+        Row(
           // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-                padding: const EdgeInsets.only(right: 10),
+                padding: const EdgeInsets.only(top: 8, left: 10),
                 child: MSHCheckbox(
                     size: 20,
                     value: isChecked,
-                    checkedColor: Colors.blue,
+                    checkedColor: Colors.orange,
                     style: MSHCheckboxStyle.fillScaleColor,
                     onChanged: (selected) async {
                       setState(() {
@@ -91,7 +96,9 @@ class _ItemState extends State<Item> {
                     })),
             Expanded(
                 child: CupertinoTextField(
+                    placeholder: 'TODO',
                     controller: editingController,
+                    maxLines: null,
                     decoration:
                         const BoxDecoration(color: CupertinoColors.white))),
             SizedBox(
@@ -100,7 +107,9 @@ class _ItemState extends State<Item> {
               child: Transform.translate(
                   offset: const Offset(0, -5),
                   child: IconButton(
-                      icon: const Icon(Icons.clear),
+                      padding: const EdgeInsets.only(top: 10, right: 10),
+                      icon: const Icon(Icons.clear, size: 25),
+                      color: Colors.orange,
                       onPressed: () {
                         editingController.clear();
                         widget.itemObj.setItemValue("");
@@ -108,6 +117,9 @@ class _ItemState extends State<Item> {
                       })),
             ),
           ],
-        ));
+        ),
+      ],
+    );
+    // );
   }
 }
