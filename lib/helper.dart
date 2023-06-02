@@ -1,5 +1,3 @@
-// import 'dart:developer';
-// var newMap = {'checked': false, 'itemValue': ""};
 import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -117,13 +115,51 @@ var week = [
   "Sunday"
 ];
 
+var weekAbbreviations = {
+    'Monday': 'Mon',
+    'Tuesday': 'Tue',
+    'Wednesday': 'Wed',
+    'Thursday': 'Thu',
+    'Friday': 'Fri',
+    'Saturday': 'Sat',
+    'Sunday': 'Sun'
+};
+
+var month = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
+
+var monthAbbreviations = {
+  'January': 'Jan',
+  'February': 'Feb',
+  'March': 'Mar',
+  'April': 'Apr',
+  'May': 'May',
+  'June': 'Jun',
+  'July': 'Jul',
+  'August': 'Aug',
+  'September': 'Sep',
+  'October': 'Oct',
+  'November': 'Nov',
+  'December': 'Dec'
+};
+
 List<dynamic> createWeek() {
   var weekindex = [-3, -2, -1, 0, 1, 2, 3];
   var currDayTime = DateTime.now();
   var currDay = DateFormat('EEEE').format(currDayTime);
   var currDate = DateFormat('MM.dd.yyyy').format(currDayTime);
-
-  print("DATE: ${DateFormat('MM.dd.yyyy').format(currDayTime)}");
   var index = week.indexWhere((day) => day == currDay);
   var res = [];
 
@@ -149,6 +185,44 @@ List<dynamic> createWeek() {
           week[currindex],
           DateFormat('MM.dd.yyyy')
               .format(currDayTime.add(Duration(days: weekindex[i])))
+        ]);
+      }
+    }
+  } catch (e) {
+    print("ERROR: $e");
+  }
+  return res;
+}
+
+List<dynamic> createMonth() {
+  var monthIndex = [-3, -2, -1, 0, 1, 2, 3];
+  var currDayTime = DateTime.now();
+  var currMonth = DateFormat('MMMM').format(currDayTime);
+  var currDate = DateFormat('MM.dd.yyyy').format(currDayTime);
+  var index = month.indexWhere((month) => month == currMonth);
+  var res = [];
+  try {
+    for (int i = 0; i < 7; i++) {
+      var currindex = index + monthIndex[i];
+      if (currindex < 0) {
+        res.add([
+          month[month.length + currindex],
+          DateFormat('MM.dd.yyyy')
+              .format(currDayTime.subtract(Duration(days: monthIndex[i].abs())))
+        ]);
+      } else if (currindex == index) {
+        res.add([month[index], currDate]);
+      } else if (currindex >= 12) {
+        res.add([
+          month[currindex - monthIndex.length],
+          DateFormat('MM.dd.yyyy')
+              .format(currDayTime.add(Duration(days: monthIndex[i])))
+        ]);
+      } else {
+        res.add([
+          month[currindex],
+          DateFormat('MM.dd.yyyy')
+              .format(currDayTime.add(Duration(days: monthIndex[i])))
         ]);
       }
     }
