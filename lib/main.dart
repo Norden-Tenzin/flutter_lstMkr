@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+//
 import 'home.dart';
+import 'calender_helper.dart';
+import 'helper.dart';
 
 void main() {
-  runApp(const MaterialApp(home: SegmentedControlApp()));
-  // runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+      create: (context) =>
+          UserDetailsProvider(month: monthAbbreviations[DateFormat('MMMM').format(DateTime.now())]!, year: DateFormat('yyyy').format(DateTime.now()), selectedDate: null),
+      child: const MaterialApp(home: SegmentedControlApp())));
 }
 
 class MyApp extends StatefulWidget {
@@ -143,3 +150,4 @@ extension StyleName on MSHCheckboxStyle {
     }
   }
 }
+

@@ -12,12 +12,14 @@ class Item extends StatefulWidget {
   final Function removeFunc;
   final ItemObj itemObj;
   final DatabaseHelper db;
+  final bool active;
   const Item(
       {Key? key,
       // required this.controller,
       required this.itemObj,
       required this.removeFunc,
-      required this.db})
+      required this.db,
+      this.active = true})
       : super(key: key);
 
   @override
@@ -49,32 +51,12 @@ class _ItemState extends State<Item> {
     editingController.text = widget.itemObj.itemValue;
   }
 
-  // void refresh() {
-  //   int id = widget.itemObj.id;
-  //   print("IN REFRESH $id");
-  // }
-
-  // @override
-  // void dispose() {
-  //   int id = widget.itemObj.id;
-  //   print("IN DISPOSE $id");
-  //   editingController.dispose();
-  //   super.dispose();
-  // }
-
   @override
   Widget build(BuildContext context) {
     int initIsChecked = widget.itemObj.checked;
     bool isChecked = initIsChecked == 1 ? true : false;
-    return
-        // Container(
-        //     height: 50,
-        //     padding: const EdgeInsets.only(left: 15, right: 10),
-        //     child:
-        Column(
-      children: [
-        Row(
-          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(children: [
+      Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -83,43 +65,99 @@ class _ItemState extends State<Item> {
                 child: MSHCheckbox(
                     size: 20,
                     value: isChecked,
+                    // ignore: deprecated_member_use
                     checkedColor: Colors.orange,
-                    style: MSHCheckboxStyle.fillScaleColor,
+                    style: MSHCheckboxStyle.fillFade,
                     onChanged: (selected) async {
-                      setState(() {
-                        log("$selected");
-                        isChecked = selected;
-                        int val = selected == true ? 1 : 0;
-                        widget.itemObj.setBool(val);
-                        widget.db.updateItem(widget.itemObj);
-                      });
+                      if (widget.active) {
+                        setState(() {
+                          log("$selected");
+                          isChecked = selected;
+                          int val = selected == true ? 1 : 0;
+                          widget.itemObj.setBool(val);
+                          widget.db.updateItem(widget.itemObj);
+                        });
+                      }
                     })),
-            Expanded(
-                child: CupertinoTextField(
-                    placeholder: 'TODO',
-                    controller: editingController,
-                    maxLines: null,
-                    decoration:
-                        const BoxDecoration(color: CupertinoColors.white))),
-            SizedBox(
-              height: 30,
-              width: 30,
-              child: Transform.translate(
-                  offset: const Offset(0, -5),
-                  child: IconButton(
-                      padding: const EdgeInsets.only(top: 10, right: 10),
-                      icon: const Icon(Icons.clear, size: 25),
-                      color: Colors.orange,
-                      onPressed: () {
-                        editingController.clear();
-                        widget.itemObj.setItemValue("");
-                        widget.removeFunc(widget.itemObj);
-                      })),
-            ),
-          ],
-        ),
-      ],
-    );
-    // );
+            widget.active
+                ? Expanded(
+                    child: CupertinoTextField(
+                        enabled: widget.active,
+                        placeholder: 'TODO',
+                        cursorColor: Colors.orange,
+                        controller: editingController,
+                        maxLines: null,
+                        style: const TextStyle(fontSize: 16),
+                        decoration:
+                            const BoxDecoration(color: CupertinoColors.white)))
+                : Expanded(
+                    child: Padding(
+                        padding: const EdgeInsets.only(top: 8, left: 8),
+                        child: Text(
+                          widget.itemObj.itemValue,
+                          style: const TextStyle(fontSize: 16),
+                        ))),
+            if (widget.active)
+              SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: Transform.translate(
+                      offset: const Offset(0, -5),
+                      child: IconButton(
+                          padding: const EdgeInsets.only(top: 10, right: 10),
+                          icon: const Icon(Icons.clear, size: 25),
+                          color: Colors.orange,
+                          onPressed: () {
+                            showDialog<String>(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                        title: const Text('DEBUG DELETING'),
+                                        content: const Text('Are you sure?'),
+                                        actionsAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        actions: <Widget>[
+                                          Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 5.0),
+                                              child: SizedBox(
+                                                  width: 125,
+                                                  child: ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor:
+                                                          Colors.black,
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                          context, 'Naa');
+                                                    },
+                                                    child: const Text('Naa'),
+                                                  ))),
+                                          Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 5.0),
+                                              child: SizedBox(
+                                                  width: 125,
+                                                  child: ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor:
+                                                          Colors.orange,
+                                                    ),
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                          context, 'Yes');
+                                                      editingController.clear();
+                                                      widget.itemObj
+                                                          .setItemValue("");
+                                                      widget.removeFunc(
+                                                          widget.itemObj);
+                                                    },
+                                                    child: const Text('Yes'),
+                                                  )))
+                                        ]));
+                          })))
+          ])
+    ]);
   }
 }

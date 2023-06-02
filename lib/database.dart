@@ -1,23 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:lstmkr/item.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:intl/intl.dart';
 
 // my imps
 import 'helper.dart';
 
 class DatabaseHelper {
   Future<Database> database() async {
-    // await deleteDatabase(join(await getDatabasesPath(), "lst.db"));
     return openDatabase(
       join(await getDatabasesPath(), "lst.db"),
       onCreate: (db, version) async {
-        // table WeekdayTasksTemplate
-        // CREATE TABLE WeekdayTasksTemplate(template_id TEXT PRIMARY KEY, lid INTEGER, day TEXT, des TEXT);
-
-        // table WeekdayTasks
-        // CREATE TABLE WeekdayTasks(taskId TEXT PRIMARY KEY, lid INTEGER, day TEXT, date TEXT, des TEXT, checked INTEGER);
         await db.execute(
             "CREATE TABLE WeekdayTasksTemplate(templateId TEXT PRIMARY KEY, lid INTEGER, day TEXT, des TEXT)");
         await db.execute(
@@ -28,7 +19,6 @@ class DatabaseHelper {
   }
 
   Future<void> insertItem(ItemObj item) async {
-    print("IN INSERT ITEM");
     Database db = await database();
     await db.insert(
       'WeekdayTasks',
@@ -52,23 +42,25 @@ class DatabaseHelper {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    var x = await retrieveEverything();
-    print("RETRIEVE EVERYTHING: $x");
   }
 
-  Future<List<ItemObj>> retrieveItem(weekday, weekdate) async {
+  Future<int> getTasksCount(date) async {
     final db = await database();
-
-    List<ItemObj> lst;
-    // dynamic count = await db.rawQuery(
-    //     "SELECT COUNT(*) as count FROM WeekdayTasks WHERE date = '$weekdate' and day = '$weekday'");
-    final List<Map<String, dynamic>> tasks = await db
-        .query("WeekdayTasks where date = '$weekdate' and day = '$weekday'");
-
+    final List<Map<String, dynamic>> tasks =
+        await db.query("WeekdayTasks where date = '$date'");
     if (tasks.isNotEmpty) {
-      // something exists for the same date
-      // keep the same data and retrieve
+      return tasks.length;
+    } else {
+      return 0;
+    }
+  }
 
+  Future<List<ItemObj>> getTasksList(date) async {
+    final db = await database();
+    List<ItemObj> lst;
+    final List<Map<String, dynamic>> tasks =
+        await db.query("WeekdayTasks where date = '$date'");
+    if (tasks.isNotEmpty) {
       try {
         lst = List.generate(tasks.length, (i) {
           return ItemObj.maps(tasks[i]);
@@ -78,11 +70,26 @@ class DatabaseHelper {
       }
       return lst;
     } else {
-      // insert into firstTable (column1, column2, ...) select column1, column2,...  from secondTable;
-      // nothing exists for the same date
-      // reset data with new date and bool
-      // await updateItemsWeek(weekday, weekdate);
+      return [];
+    }
+  }
 
+  Future<List<ItemObj>> retrieveItem(weekday, weekdate) async {
+    final db = await database();
+    List<ItemObj> lst;
+    final List<Map<String, dynamic>> tasks = await db
+        .query("WeekdayTasks where date = '$weekdate' and day = '$weekday'");
+
+    if (tasks.isNotEmpty) {
+      try {
+        lst = List.generate(tasks.length, (i) {
+          return ItemObj.maps(tasks[i]);
+        });
+      } catch (e) {
+        lst = [];
+      }
+      return lst;
+    } else {
       await db.rawInsert(
           "insert into WeekdayTasks(taskId, lid, day, date, des, checked) select templateId as taskId, lid, day, '$weekdate' as date, des, 0 as checked from WeekdayTasksTemplate where day = '$weekday'");
 
@@ -123,7 +130,6 @@ class DatabaseHelper {
   }
 
   Future<void> updateItem(ItemObj item) async {
-    print("IN UPDATE ITEM");
     final db = await database();
     await db.update(
       'WeekdayTasks',
@@ -140,7 +146,6 @@ class DatabaseHelper {
   }
 
   Future<void> deleteItem(ItemObj item) async {
-    print("IN DELETE ITEM");
     final db = await database();
     await db.delete(
       'WeekdayTasks',
@@ -153,46 +158,4 @@ class DatabaseHelper {
       whereArgs: [item.taskId, item.day],
     );
   }
-
-  // Future<void> updateItemsWeek(weekday, weekdate) async {
-  //   // Get a reference to the database.
-  //   final db = await database();
-
-  //   // Update the given Dog.
-  //   await db.update(
-  //     'WeekdayTasks',
-  //     {"checked": 0, "date": weekdate},
-  //     // Ensure that the Dog has a matching id.
-  //     where: 'day = ?',
-  //     // Pass the Dog's id as a whereArg to prevent SQL injection.
-  //     whereArgs: [weekday],
-  //   );
-  // }
-
-  // Future<Map<dynamic, dynamic>> retrieveWeek() async {
-  //   final db = await database();
-  //   var week = [
-  //     "Monday",
-  //     "Tuesday",
-  //     "Wednesday",
-  //     "Thursday",
-  //     "Friday",
-  //     "Saturday",
-  //     "Sunday"
-  //   ];
-  //   Map res = {};
-
-  //   for (String day in week) {
-  //     List<Map<String, Object?>> qres;
-  //     List<Map<String, Object?>> query = await db
-  //         .rawQuery("SELECT * FROM WeekdayTasksTemplate WHERE day = $day");
-  //     try {
-  //       qres = query;
-  //     } catch (e) {
-  //       qres = [];
-  //     }
-  //     res[day] = qres;
-  //   }
-  //   return res;
-  // }
 }

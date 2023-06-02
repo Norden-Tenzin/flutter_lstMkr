@@ -23,7 +23,6 @@ void main(List<String> args) {
     var index = week.indexWhere((day) => day == curr_day);
     for (int i = 0; i < weekindex.length; i++) {
       var currindex = index + weekindex[i];
-      print(currindex);
       if (currindex < 0) {
         res.add([
           week[week.length + currindex],
@@ -40,9 +39,6 @@ void main(List<String> args) {
         ]);
       }
     }
-
-    print(res);
-    // print(week[week.length - index] == "Sunday");
   }
 
   createDay();
